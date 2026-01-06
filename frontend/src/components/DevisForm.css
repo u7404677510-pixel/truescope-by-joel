@@ -1,0 +1,180 @@
+.devis-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.form-section {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-lg);
+}
+
+.section-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--gradient-primary);
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  border-radius: 50%;
+}
+
+.optional {
+  font-weight: 400;
+  color: var(--color-text-subtle);
+  font-size: 0.875rem;
+}
+
+/* Grille des métiers */
+.metier-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-md);
+}
+
+.metier-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  background: var(--color-bg-elevated);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.metier-card:hover {
+  border-color: var(--color-primary-light);
+  background: var(--color-bg-hover);
+}
+
+.metier-card.selected {
+  border-color: var(--color-primary);
+  background: rgba(158, 118, 236, 0.05);
+}
+
+.metier-card.selected.serrurerie {
+  border-color: var(--color-serrurerie);
+  background: rgba(158, 118, 236, 0.05);
+}
+
+.metier-card.selected.plomberie {
+  border-color: var(--color-plomberie);
+  background: rgba(112, 85, 167, 0.05);
+}
+
+.metier-card.selected.electricite {
+  border-color: var(--color-electricite);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.metier-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  transition: color 0.2s ease;
+}
+
+.metier-card:hover .metier-icon {
+  color: var(--color-text);
+}
+
+.metier-card.selected.serrurerie .metier-icon {
+  color: var(--color-serrurerie);
+}
+
+.metier-card.selected.plomberie .metier-icon {
+  color: var(--color-plomberie);
+}
+
+.metier-card.selected.electricite .metier-icon {
+  color: var(--color-electricite);
+}
+
+.metier-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.metier-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* Description input */
+.description-input {
+  min-height: 140px;
+  line-height: 1.6;
+}
+
+.char-count {
+  font-size: 0.75rem;
+  color: var(--color-text-subtle);
+  text-align: right;
+  margin-top: var(--spacing-sm);
+}
+
+/* Media input */
+.media-input {
+  min-height: 100px;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+.help-text {
+  font-size: 0.8125rem;
+  color: var(--color-text-subtle);
+  margin-top: var(--spacing-sm);
+}
+
+/* Submit button */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submit-btn {
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+  gap: var(--spacing-sm);
+}
+
+.submit-btn .spinner {
+  width: 18px;
+  height: 18px;
+  border-width: 2px;
+}
+
+@media (max-width: 640px) {
+  .metier-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-section {
+    padding: var(--spacing-lg);
+  }
+  
+  .submit-btn {
+    width: 100%;
+  }
+}

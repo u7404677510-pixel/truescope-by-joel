@@ -1,0 +1,516 @@
+/* Admin Header */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-xl);
+}
+
+.admin-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-xs);
+}
+
+.admin-subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.header-actions .btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* Alerts */
+.admin-alert {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+  font-size: 0.9375rem;
+}
+
+.admin-alert.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--color-danger);
+}
+
+.admin-alert.success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: var(--color-success);
+}
+
+.admin-alert button {
+  font-size: 1.25rem;
+  opacity: 0.7;
+}
+
+.admin-alert button:hover {
+  opacity: 1;
+}
+
+/* Metier Tabs */
+.metier-tabs {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.metier-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.metier-tab:hover {
+  border-color: var(--color-border-light);
+  color: var(--color-text);
+}
+
+.metier-tab.active {
+  background: linear-gradient(135deg, var(--color-serrurerie), var(--color-plomberie));
+  border-color: transparent;
+  color: white;
+}
+
+.metier-tab-icon {
+  font-size: 1.25rem;
+}
+
+.metier-tab-count {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.metier-tab:not(.active) .metier-tab-count {
+  background: var(--color-bg-elevated);
+}
+
+/* Categorie Tabs */
+.categorie-tabs {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.categorie-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.categorie-tab:hover {
+  color: var(--color-text);
+}
+
+.categorie-tab.active {
+  color: var(--color-serrurerie);
+  border-bottom-color: var(--color-serrurerie);
+}
+
+.categorie-tab-count {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  background: var(--color-bg-elevated);
+  border-radius: 8px;
+  color: var(--color-text-subtle);
+}
+
+.categorie-tab.active .categorie-tab-count {
+  background: rgba(158, 118, 236, 0.1);
+  color: var(--color-serrurerie);
+}
+
+/* Tarifs Table */
+.tarifs-table-container {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.tarifs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tarifs-table thead {
+  background: var(--color-bg-elevated);
+}
+
+.tarifs-table th {
+  padding: var(--spacing-md) var(--spacing-lg);
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tarifs-table td {
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: 0.9375rem;
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tarifs-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tarifs-table tbody tr:hover {
+  background: var(--color-bg-hover);
+}
+
+.col-code {
+  width: 120px;
+}
+
+.col-code code {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  padding: 2px 6px;
+  background: var(--color-bg-elevated);
+  border-radius: 4px;
+  color: var(--color-text-muted);
+}
+
+.col-designation {
+  width: auto;
+}
+
+.col-prix {
+  width: 140px;
+}
+
+.col-unite {
+  width: 100px;
+  color: var(--color-text-muted);
+}
+
+.col-actions {
+  width: 60px;
+  text-align: center;
+}
+
+/* Action Buttons */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-icon:hover {
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+}
+
+.btn-icon.btn-delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+}
+
+/* Prix Display & Edit */
+.prix-display {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(158, 118, 236, 0.08);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-serrurerie);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.prix-display:hover {
+  background: rgba(158, 118, 236, 0.15);
+  border-color: var(--color-serrurerie);
+}
+
+.prix-display svg {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.prix-display:hover svg {
+  opacity: 1;
+}
+
+.prix-input {
+  width: 100px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: 2px solid var(--color-serrurerie);
+  border-radius: var(--radius-sm);
+  outline: none;
+  background: white;
+}
+
+.prix-input:focus {
+  box-shadow: 0 0 0 3px rgba(158, 118, 236, 0.2);
+}
+
+/* Empty State */
+.empty-row {
+  text-align: center;
+  padding: var(--spacing-2xl) !important;
+  color: var(--color-text-muted);
+}
+
+/* Loading */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-2xl);
+  color: var(--color-text-muted);
+}
+
+.spinner-small {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-serrurerie);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background: white;
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.modal-close:hover {
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+}
+
+.modal-body {
+  padding: var(--spacing-lg);
+}
+
+.modal-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-sm);
+}
+
+.modal-info-label {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.modal-info-value {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: var(--spacing-md);
+  font-size: 0.9375rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: white;
+  transition: all 0.15s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--color-serrurerie);
+  box-shadow: 0 0 0 3px rgba(158, 118, 236, 0.15);
+}
+
+.form-group input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .metier-tabs {
+    flex-wrap: wrap;
+  }
+  
+  .metier-tab {
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+  }
+  
+  .tarifs-table-container {
+    overflow-x: auto;
+  }
+  
+  .tarifs-table {
+    min-width: 600px;
+  }
+
+  .header-actions {
+    flex-direction: column;
+  }
+
+  .modal {
+    margin: var(--spacing-md);
+    max-width: calc(100% - var(--spacing-xl));
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
