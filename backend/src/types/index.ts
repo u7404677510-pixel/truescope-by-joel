@@ -1,4 +1,4 @@
-// Types pour le domaine métier du wrapper Joël
+// Types pour le domaine métier TrueScope by Joël
 
 export type Metier = 'serrurerie' | 'plomberie' | 'electricite';
 
@@ -6,12 +6,12 @@ export type DemandeStatus = 'pending' | 'analyzed' | 'validated';
 
 export type TarifCategorie = 'main_oeuvre' | 'materiaux';
 
-// Tarif unitaire
+// Tarif unitaire (usage interne uniquement)
 export interface Tarif {
-  code: string;           // Ex: "SER-MO-001"
-  designation: string;    // Ex: "Déplacement"
-  prix: number;          // Prix en euros
-  unite: string;         // Ex: "forfait", "ml", "pièce", "%"
+  code: string;
+  designation: string;
+  prix: number;
+  unite: string;
   categorie: TarifCategorie;
   metier: Metier;
 }
@@ -36,36 +36,17 @@ export interface LigneDevis {
   unite: string;
   quantite: number;
   prixUnitaire?: number; // Prix unitaire HT
-  prixTotal?: number;    // Prix total ligne (prixUnitaire * quantite)
-  notes?: string;
-  tarifManquant?: boolean; // true si le code tarif n'existe pas dans la base
+  prixTotal?: number;    // Prix total ligne
+  tarifManquant?: boolean;
 }
 
-// Matériel nécessaire pour l'intervention
-export interface Materiel {
-  nom: string;
-  quantite?: number;
-  marque?: string;        // Marque si détectée ou recommandée
-  specifications?: string; // Ex: "diamètre 15mm", "3 points"
-}
-
-// Solution proposée par Joël
+// Solution TrueScope - Format pour l'utilisateur
 export interface Solution {
-  description: string;
-  diagnostic: string;
-  lignesDevis: LigneDevis[];
-  materiel: Materiel[];   // Liste du matériel nécessaire
-  variantes?: Variante[];
-  recommandations?: string[];
-}
-
-// Variante de solution
-export interface Variante {
-  nom: string;
-  description: string;
-  lignesDevis: LigneDevis[];
-  avantages?: string[];
-  inconvenients?: string[];
+  descriptionProbleme: string;    // Ce qu'on a compris du problème
+  solutionTrueScope: string;      // Comment résoudre le problème
+  propositionJoel: string;        // Phrase d'accroche pour contacter Joël
+  lignesDevis: LigneDevis[];      // Détail de l'intervention avec prix
+  conseilsPrevention: string[];   // Conseils pour éviter que ça se reproduise
 }
 
 // Intervention de référence (stockée en base après validation)
@@ -82,7 +63,7 @@ export interface Intervention {
   validatedAt?: Date;
 }
 
-// Demande de devis (en cours de traitement)
+// Demande de diagnostic (en cours de traitement)
 export interface Demande {
   id: string;
   metier: Metier;
@@ -91,16 +72,15 @@ export interface Demande {
   status: DemandeStatus;
   solutionProposee?: Solution;
   interventionsSimilaires: string[];
-  raisonnementIA?: string;
   createdAt: Date;
   updatedAt?: Date;
 }
 
 // Fichier media encodé en base64
 export interface MediaFile {
-  data: string;      // Base64 encoded data
-  mimeType: string;  // Ex: "image/jpeg", "video/mp4"
-  name: string;      // Nom du fichier
+  data: string;
+  mimeType: string;
+  name: string;
 }
 
 // Requête pour créer une nouvelle demande
@@ -108,15 +88,14 @@ export interface CreateDemandeRequest {
   metier: Metier;
   description: string;
   mediaUrls?: string[];
-  mediaFiles?: MediaFile[];  // Fichiers uploadés en base64
+  mediaFiles?: MediaFile[];
 }
 
-// Réponse d'analyse de Joël
+// Réponse d'analyse TrueScope
 export interface AnalyseResponse {
   demande: Demande;
   interventionsSimilaires: Intervention[];
   solution: Solution;
-  raisonnement: string;
   confiance: 'haute' | 'moyenne' | 'basse';
 }
 
@@ -134,3 +113,19 @@ export interface SimilarityResult {
   matchedKeywords: string[];
 }
 
+// Lead généré (quand l'utilisateur clique sur "Trouver un Joël")
+export interface Lead {
+  id: string;
+  diagnosticId: string;
+  metier: Metier;
+  contact: {
+    nom: string;
+    telephone: string;
+    email?: string;
+    adresse?: string;
+  };
+  urgence: 'urgent' | 'aujourd_hui' | 'cette_semaine' | 'flexible';
+  message?: string;
+  status: 'new' | 'contacted' | 'converted' | 'lost';
+  createdAt: Date;
+}

@@ -24,16 +24,16 @@ export const getGeminiModel = () => {
   if (!genAI) {
     throw new Error('GEMINI_API_KEY non configurée');
   }
-  // Utiliser Gemini 3 Pro Preview
-  return genAI.getGenerativeModel({ model: 'gemini-3-pro-preview' });
+  // Utiliser Gemini 2.0 Flash - rapide et efficace
+  return genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 };
 
-// Configuration des paramètres de génération
+// Configuration des paramètres de génération - optimisée pour la vitesse
 export const generationConfig = {
-  temperature: 0.7,
-  topP: 0.95,
-  topK: 40,
-  maxOutputTokens: 8192,
+  temperature: 0.5,
+  topP: 0.9,
+  topK: 30,
+  maxOutputTokens: 1024, // Réduit car on a besoin de peu de texte
 };
 
 export default genAI;

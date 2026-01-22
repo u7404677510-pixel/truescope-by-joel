@@ -1,228 +1,118 @@
-import type { Solution, Intervention } from '../types';
+import type { Solution } from '../types';
 import './SolutionDisplay.css';
 
 interface SolutionDisplayProps {
   solution: Solution;
-  confiance?: 'haute' | 'moyenne' | 'basse';
-  raisonnement?: string;
-  interventionsSimilaires?: Intervention[];
-  showVariantes?: boolean;
 }
 
-function SolutionDisplay({ 
-  solution, 
-  confiance, 
-  raisonnement, 
-  interventionsSimilaires = [],
-  showVariantes = true 
-}: SolutionDisplayProps) {
+// Widget statique (toujours ouvert)
+function Widget({ 
+  title, 
+  children,
+  variant = 'default'
+}: { 
+  title: string; 
+  children: React.ReactNode;
+  variant?: 'default' | 'primary';
+}) {
   return (
-    <div className="solution-display fade-in">
-      {/* En-tête avec confiance */}
-      <div className="solution-header">
-        <div className="solution-header-content">
-          <h3 className="solution-title">💡 Solution proposée par Joël</h3>
-          {confiance && (
-            <span className={`confidence ${confiance}`}>
-              {confiance === 'haute' && '✓ Confiance élevée'}
-              {confiance === 'moyenne' && '○ Confiance moyenne'}
-              {confiance === 'basse' && '⚠ Confiance basse'}
-            </span>
-          )}
-        </div>
-        <p className="solution-diagnostic">{solution.diagnostic}</p>
+    <div className={`widget open ${variant}`}>
+      <div className={`widget-header ${variant}`}>
+        <span className="widget-title">{title}</span>
       </div>
+      <div className="widget-content">{children}</div>
+    </div>
+  );
+}
 
-      {/* Corps de la solution */}
-      <div className="solution-body">
-        {/* Description */}
-        <div className="solution-section">
-          <h4 className="subsection-title">Description de l'intervention</h4>
-          <p className="solution-description">{solution.description}</p>
-        </div>
+function SolutionDisplay({ solution }: SolutionDisplayProps) {
+  // Calcul du total
+  const total = solution.lignesDevis
+    ?.filter(l => l.prixTotal !== undefined)
+    .reduce((sum, l) => sum + (l.prixTotal || 0), 0) || 0;
 
-        {/* Matériel nécessaire */}
-        {solution.materiel && solution.materiel.length > 0 && (
-          <div className="solution-section materiel-section">
-            <h4 className="subsection-title">🧰 Matériel nécessaire</h4>
-            <div className="materiel-grid">
-              {solution.materiel.map((item, index) => (
-                <div key={index} className="materiel-item">
-                  <div className="materiel-header">
-                    <span className="materiel-nom">{item.nom}</span>
-                    {item.quantite && item.quantite > 1 && (
-                      <span className="materiel-quantite">×{item.quantite}</span>
-                    )}
-                  </div>
-                  {(item.marque || item.specifications) && (
-                    <div className="materiel-details">
-                      {item.marque && (
-                        <span className="materiel-marque">{item.marque}</span>
-                      )}
-                      {item.specifications && (
-                        <span className="materiel-specs">{item.specifications}</span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+  return (
+    <div className="solution-display-v2">
+      
+      {/* Widget 1: Description du problème */}
+      <Widget title="Description du problème">
+        <p className="problem-text">{solution.descriptionProbleme}</p>
+      </Widget>
 
-        {/* Lignes de devis */}
-        <div className="solution-section">
-          <h4 className="subsection-title">Lignes de devis proposées</h4>
-          <table className="devis-table">
-            <thead>
-              <tr>
-                <th>Code</th>
-                <th>Désignation</th>
-                <th>Qté</th>
-                <th>P.U.</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {solution.lignesDevis.map((ligne, index) => (
-                <tr key={index}>
-                  <td className="code-cell">
-                    {ligne.code ? <code>{ligne.code}</code> : '-'}
-                  </td>
-                  <td>{ligne.designation}</td>
-                  <td className="mono center">{ligne.quantite} {ligne.unite}</td>
-                  <td className="mono price-cell">
-                    {ligne.prixUnitaire !== undefined 
-                      ? `${ligne.prixUnitaire.toFixed(2)} €` 
-                      : '-'}
-                  </td>
-                  <td className="mono price-cell total">
-                    {ligne.prixTotal !== undefined 
-                      ? `${ligne.prixTotal.toFixed(2)} €` 
-                      : '-'}
-                  </td>
+      {/* Widget 2: La solution TrueScope */}
+      <Widget title="La solution TrueScope">
+        <p className="solution-text">{solution.solutionTrueScope}</p>
+      </Widget>
+
+      {/* Widget 3: La proposition Joël */}
+      <Widget title="La proposition Joël" variant="primary">
+        {/* Phrase d'accroche */}
+        <p className="proposition-accroche">{solution.propositionJoel}</p>
+        
+        {/* Tableau des lignes de devis */}
+        {solution.lignesDevis && solution.lignesDevis.length > 0 && (
+          <div className="devis-container">
+            <table className="devis-table">
+              <thead>
+                <tr>
+                  <th>Désignation</th>
+                  <th className="col-qty">Qté</th>
+                  <th className="col-price">Prix</th>
                 </tr>
-              ))}
-            </tbody>
-            {solution.lignesDevis.some(l => l.prixTotal !== undefined) && (
+              </thead>
+              <tbody>
+                {solution.lignesDevis.map((ligne, i) => (
+                  <tr key={i} className={ligne.tarifManquant ? 'missing' : ''}>
+                    <td className="designation">
+                      {ligne.designation}
+                      {ligne.code && <code className="tarif-code">{ligne.code}</code>}
+                    </td>
+                    <td className="qty">{ligne.quantite}</td>
+                    <td className="price">
+                      {ligne.tarifManquant ? (
+                        <span className="no-price">—</span>
+                      ) : ligne.unite === '%' ? (
+                        <span className="percent">+{ligne.prixUnitaire}%</span>
+                      ) : (
+                        <span>{ligne.prixTotal?.toFixed(0)}€</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
               <tfoot>
                 <tr className="total-row">
-                  <td colSpan={4} className="total-label">Total HT</td>
-                  <td className="mono price-cell total">
-                    {solution.lignesDevis
-                      .reduce((sum, l) => sum + (l.prixTotal || 0), 0)
-                      .toFixed(2)} €
-                  </td>
+                  <td colSpan={2}>Total estimé HT</td>
+                  <td className="total-price">{total.toFixed(0)}€</td>
                 </tr>
               </tfoot>
-            )}
-          </table>
-        </div>
-
-        {/* Recommandations */}
-        {solution.recommandations && solution.recommandations.length > 0 && (
-          <div className="solution-section">
-            <h4 className="subsection-title">📋 Recommandations</h4>
-            <ul className="recommendations-list">
-              {solution.recommandations.map((rec, index) => (
-                <li key={index}>{rec}</li>
-              ))}
-            </ul>
+            </table>
           </div>
         )}
+      </Widget>
 
-        {/* Variantes */}
-        {showVariantes && solution.variantes && solution.variantes.length > 0 && (
-          <div className="solution-section variantes-section">
-            <h4 className="subsection-title">🔄 Variantes possibles</h4>
-            <div className="variantes-grid">
-              {solution.variantes.map((variante, index) => (
-                <div key={index} className="variante-card">
-                  <h5 className="variante-title">{variante.nom}</h5>
-                  <p className="variante-description">{variante.description}</p>
-                  
-                  {variante.avantages && variante.avantages.length > 0 && (
-                    <div className="variante-pros">
-                      <span className="pros-label">✓ Avantages:</span>
-                      <ul>
-                        {variante.avantages.map((a, i) => <li key={i}>{a}</li>)}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  {variante.inconvenients && variante.inconvenients.length > 0 && (
-                    <div className="variante-cons">
-                      <span className="cons-label">✗ Inconvénients:</span>
-                      <ul>
-                        {variante.inconvenients.map((c, i) => <li key={i}>{c}</li>)}
-                      </ul>
-                    </div>
-                  )}
+      {/* Bouton CTA vers monjoel.fr */}
+      <a 
+        href="https://monjoel.fr" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="cta-button"
+      >
+        Trouver mon Joël
+      </a>
 
-                  <details className="variante-devis">
-                    <summary>Voir les lignes de devis</summary>
-                    <table className="devis-table small">
-                      <thead>
-                        <tr>
-                          <th>Désignation</th>
-                          <th>Qté</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {variante.lignesDevis.map((ligne, i) => (
-                          <tr key={i}>
-                            <td>{ligne.designation}</td>
-                            <td className="mono">{ligne.quantite} {ligne.unite}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </details>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Raisonnement IA */}
-        {raisonnement && (
-          <div className="solution-section raisonnement-section">
-            <details className="raisonnement-details">
-              <summary>
-                <span className="raisonnement-icon">🤖</span>
-                Voir le raisonnement de Joël
-              </summary>
-              <div className="raisonnement-content">
-                {raisonnement}
-              </div>
-            </details>
-          </div>
-        )}
-
-        {/* Interventions similaires */}
-        {interventionsSimilaires.length > 0 && (
-          <div className="solution-section similaires-section">
-            <details className="similaires-details">
-              <summary>
-                <span className="similaires-icon">📚</span>
-                {interventionsSimilaires.length} intervention(s) similaire(s) trouvée(s)
-              </summary>
-              <div className="similaires-list">
-                {interventionsSimilaires.map((int, index) => (
-                  <div key={int.id || index} className="similaire-item">
-                    <span className={`badge badge-${int.metier}`}>{int.metier}</span>
-                    <span className="similaire-type">{int.problemType}</span>
-                    <p className="similaire-desc">{int.description.substring(0, 100)}...</p>
-                  </div>
-                ))}
-              </div>
-            </details>
-          </div>
-        )}
-      </div>
+      {/* Widget 4: Conseils de prévention */}
+      {solution.conseilsPrevention && solution.conseilsPrevention.length > 0 && (
+        <Widget title="Pour que ça n'arrive plus">
+          <ul className="conseils-list">
+            {solution.conseilsPrevention.map((conseil, i) => (
+              <li key={i}>{conseil}</li>
+            ))}
+          </ul>
+        </Widget>
+      )}
     </div>
   );
 }
 
 export default SolutionDisplay;
-

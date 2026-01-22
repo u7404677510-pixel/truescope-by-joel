@@ -1,0 +1,188 @@
+# TrueScope by Joël - Cursor Rules
+
+## 🎯 Project Context
+
+TrueScope is a FREE diagnostic tool for homeowners experiencing locksmith, plumbing, or electrical problems.
+The AI (Google Gemini) analyzes the problem and provides a detailed diagnostic.
+
+**CRITICAL: This is a LEAD GENERATION tool, NOT a quoting system.**
+- NO PRICES are shown to users
+- The goal is to generate leads for "Joël" (an artisan network) via a "Trouver un Joël" CTA button
+- Users get value (free diagnostic), Joël gets qualified leads
+
+## ⚠️ Critical Business Rules
+
+1. **NEVER display prices to users** - Remove any price, tarif, or cost information from UI
+2. **NEVER generate or show cost estimates** - The diagnostic is free, pricing happens after contact
+3. **Always include a prominent CTA** - "Trouver un Joël" / "Contacter un artisan"
+4. **French language** - All UI text must be in French
+5. **Lead capture** - Every diagnostic should lead to a contact opportunity
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React 18 + TypeScript + Vite
+- **Backend**: Node.js + Express + TypeScript
+- **Database**: Firebase Firestore
+- **AI**: Google Gemini Pro (via @google/generative-ai)
+- **Styling**: CSS Variables (no framework, custom design)
+- **Routing**: React Router v6
+
+## 📁 Project Structure
+
+```
+TrueScope/
+├── backend/
+│   ├── src/
+│   │   ├── config/        # Firebase & Gemini configuration
+│   │   │   ├── firebase.ts
+│   │   │   ├── gemini.ts
+│   │   │   └── index.ts
+│   │   ├── routes/        # Express API routes
+│   │   │   ├── demandes.ts
+│   │   │   ├── interventions.ts
+│   │   │   ├── tarifs.ts
+│   │   │   └── index.ts
+│   │   ├── services/      # Business logic
+│   │   │   ├── gemini.ts      # AI analysis
+│   │   │   ├── joel-core.ts   # Core logic
+│   │   │   ├── similarity.ts  # Find similar cases
+│   │   │   └── tarifs.ts      # Pricing (backend only)
+│   │   ├── types/         # TypeScript interfaces
+│   │   └── server.ts      # Express app entry
+│   ├── .env               # Environment variables (DO NOT COMMIT)
+│   └── package.json
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/    # Reusable UI components
+│   │   │   ├── Header.tsx
+│   │   │   ├── DevisForm.tsx
+│   │   │   ├── MediaUpload.tsx
+│   │   │   └── SolutionDisplay.tsx
+│   │   ├── pages/         # Route-level pages
+│   │   │   ├── NewDemande.tsx      # Create new diagnostic
+│   │   │   ├── DemandeDetail.tsx   # View diagnostic result
+│   │   │   ├── Historique.tsx      # History of diagnostics
+│   │   │   └── admin/              # Admin panel (internal)
+│   │   ├── layouts/       # Layout wrappers
+│   │   ├── services/      # API calls (api.ts)
+│   │   └── types/         # TypeScript interfaces
+│   ├── public/            # Static assets (logo, etc.)
+│   └── package.json
+│
+├── docs/                  # Documentation
+└── .cursorrules           # This file
+```
+
+## 🎨 Code Conventions
+
+### TypeScript
+- Strict mode enabled
+- Explicit return types on functions
+- Use interfaces over types for objects
+- Prefer `const` over `let`
+
+### React Components
+- Functional components only (no classes)
+- Hooks for state management (useState, useEffect)
+- Props destructuring in function signature
+- Colocated CSS files (ComponentName.css)
+
+### CSS
+- CSS Variables for theming (defined in index.css)
+- BEM-like naming: `.component-name__element--modifier`
+- No CSS frameworks - custom design
+- Mobile-first responsive design
+
+### API Calls
+- All API calls go through `frontend/src/services/api.ts`
+- Base URL from environment or localhost:3001
+- Async/await with proper error handling
+
+### Naming
+- Components: PascalCase (`DemandeDetail.tsx`)
+- Functions: camelCase (`analyzeWithGemini`)
+- CSS classes: kebab-case (`solution-card`)
+- Constants: SCREAMING_SNAKE_CASE (`API_BASE_URL`)
+
+## 🗄️ Firebase Collections
+
+```
+/demandes/{demandeId}
+  - id: string
+  - metier: 'serrurerie' | 'plomberie' | 'electricite'
+  - description: string
+  - mediaUrls: string[]
+  - status: 'pending' | 'analyzed' | 'validated'
+  - solutionProposee: Solution
+  - createdAt: Timestamp
+
+/interventions/{interventionId}
+  - id: string
+  - metier: Metier
+  - description: string
+  - keywords: string[]
+  - problemType: string
+  - solution: Solution
+  - validated: boolean
+  - createdAt: Timestamp
+
+/tarifs/{metier}/{categorie}/{code}  # Backend only, NOT exposed to frontend
+  - code: string
+  - designation: string
+  - prix: number
+  - unite: string
+
+/leads/{leadId}  # TO BE CREATED
+  - diagnosticId: string
+  - contact: { nom, telephone, email?, adresse? }
+  - urgence: 'urgent' | 'aujourd_hui' | 'cette_semaine' | 'flexible'
+  - status: 'new' | 'contacted' | 'converted' | 'lost'
+  - createdAt: Timestamp
+```
+
+## 🔌 API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/demandes` | Create and analyze a new diagnostic |
+| GET | `/api/demandes` | List all diagnostics |
+| GET | `/api/demandes/:id` | Get diagnostic details |
+| POST | `/api/demandes/:id/validate` | Validate a diagnostic |
+| POST | `/api/demandes/:id/reanalyze` | Re-run AI analysis |
+| GET | `/api/interventions` | List reference interventions |
+| GET | `/api/interventions/search` | Search similar cases |
+| GET | `/api/health` | Health check |
+
+## 🌍 Environment Variables
+
+### Backend (.env)
+```
+GEMINI_API_KEY=xxx              # Google AI Studio API key
+FIREBASE_SERVICE_ACCOUNT_PATH=./firebase-service-account.json
+PORT=3001
+NODE_ENV=development
+```
+
+### Frontend (Vite)
+```
+VITE_API_URL=http://localhost:3001  # Optional, defaults to localhost
+```
+
+## 🚫 What NOT to Do
+
+1. Don't expose pricing data to the frontend
+2. Don't use external CSS frameworks (Tailwind, Bootstrap)
+3. Don't add authentication yet (future feature)
+4. Don't create new pages without discussing first
+5. Don't modify Firebase security rules without review
+6. Don't commit .env files or service account keys
+
+## ✅ What TO Do
+
+1. Keep the UI clean, modern, and professional
+2. Maintain French language throughout
+3. Ensure prominent CTAs on every diagnostic result
+4. Log errors properly with console.error
+5. Handle loading and error states in UI
+6. Test on mobile viewport sizes

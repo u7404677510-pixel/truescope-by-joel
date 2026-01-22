@@ -4,80 +4,18 @@
   padding: 0 var(--spacing-md);
 }
 
-/* Header */
-.historique-header {
-  margin-bottom: var(--spacing-2xl);
+/* Titre style TrueScope */
+.historique-title {
   text-align: center;
-}
-
-.historique-header h1 {
-  font-size: 2rem;
+  font-size: 3rem;
   font-weight: 300;
-  color: var(--color-text);
-  letter-spacing: -0.5px;
-  margin-bottom: 8px;
-}
-
-.historique-header p {
-  color: var(--color-text-muted);
-  font-size: 0.9375rem;
-  font-weight: 300;
-}
-
-/* Navigation */
-.historique-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
-  padding-bottom: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.tabs {
-  display: flex;
-  gap: 2px;
-  background: var(--color-bg-elevated);
-  padding: 4px;
-  border-radius: var(--radius-lg);
-}
-
-.tab {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: 10px 24px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  background: transparent;
-  border-radius: var(--radius-md);
-  transition: all 0.2s ease;
-}
-
-.tab:hover {
-  color: var(--color-text);
-}
-
-.tab.active {
-  background: white;
-  color: var(--color-text);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.tab .count {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  padding: 2px 6px;
-  background: var(--color-bg-elevated);
-  border-radius: 8px;
-  color: var(--color-text-subtle);
-}
-
-.tab.active .count {
-  background: linear-gradient(135deg, var(--color-serrurerie), var(--color-plomberie));
-  color: white;
+  letter-spacing: -2px;
+  background: linear-gradient(135deg, var(--color-serrurerie) 0%, var(--color-plomberie) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 var(--spacing-2xl) 0;
+  padding: var(--spacing-xl) 0;
 }
 
 /* Filters */
@@ -188,12 +126,12 @@
 
 .card:hover {
   border-color: transparent;
-  box-shadow: 0 8px 30px rgba(158, 118, 236, 0.12), 0 0 0 1px rgba(158, 118, 236, 0.1);
+  box-shadow: 0 8px 30px rgba(158, 118, 236, 0.12), 0 0 0 1px rgba(255, 212, 102, 0.3);
   transform: translateY(-4px);
 }
 
 .card:hover::before {
-  background: linear-gradient(90deg, var(--color-serrurerie), var(--color-plomberie));
+  background: linear-gradient(90deg, var(--color-serrurerie), #ffd466);
 }
 
 .card.intervention {

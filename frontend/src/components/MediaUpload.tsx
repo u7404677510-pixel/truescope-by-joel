@@ -154,7 +154,7 @@ function MediaUpload({ onFilesChange, maxFiles = 5, maxSizeMB = 10 }: MediaUploa
       {/* Message d'erreur */}
       {error && (
         <div className="upload-error">
-          <span className="error-icon">⚠️</span>
+          <span className="error-icon">!</span>
           {error}
         </div>
       )}

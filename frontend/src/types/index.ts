@@ -1,4 +1,4 @@
-// Types miroir du backend
+// Types miroir du backend - TrueScope by Joël
 
 export type Metier = 'serrurerie' | 'plomberie' | 'electricite';
 
@@ -6,7 +6,7 @@ export type DemandeStatus = 'pending' | 'analyzed' | 'validated';
 
 export type TarifCategorie = 'main_oeuvre' | 'materiaux';
 
-// Tarif unitaire
+// Tarif unitaire (usage admin uniquement)
 export interface Tarif {
   code: string;
   designation: string;
@@ -29,6 +29,7 @@ export interface AllTarifs {
   electricite: TarifsMetier;
 }
 
+// Ligne de devis (avec prix calculé depuis les tarifs)
 export interface LigneDevis {
   code?: string;
   designation: string;
@@ -36,32 +37,16 @@ export interface LigneDevis {
   quantite: number;
   prixUnitaire?: number;
   prixTotal?: number;
-  notes?: string;
-  tarifManquant?: boolean; // true si le code tarif n'existe pas dans la base
+  tarifManquant?: boolean;
 }
 
-export interface Materiel {
-  nom: string;
-  quantite?: number;
-  marque?: string;
-  specifications?: string;
-}
-
-export interface Variante {
-  nom: string;
-  description: string;
-  lignesDevis: LigneDevis[];
-  avantages?: string[];
-  inconvenients?: string[];
-}
-
+// Solution TrueScope - Format pour l'utilisateur
 export interface Solution {
-  description: string;
-  diagnostic: string;
-  materiel: Materiel[];
-  lignesDevis: LigneDevis[];
-  variantes?: Variante[];
-  recommandations?: string[];
+  descriptionProbleme: string;    // Ce qu'on a compris du problème
+  solutionTrueScope: string;      // Comment résoudre le problème
+  propositionJoel: string;        // Phrase d'accroche pour contacter Joël
+  lignesDevis: LigneDevis[];      // Détail de l'intervention avec prix
+  conseilsPrevention: string[];   // Conseils pour éviter que ça se reproduise
 }
 
 export interface Intervention {
@@ -85,7 +70,6 @@ export interface Demande {
   status: DemandeStatus;
   solutionProposee?: Solution;
   interventionsSimilaires: string[];
-  raisonnementIA?: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -94,6 +78,5 @@ export interface AnalyseResponse {
   demande: Demande;
   interventionsSimilaires: Intervention[];
   solution: Solution;
-  raisonnement: string;
   confiance: 'haute' | 'moyenne' | 'basse';
 }

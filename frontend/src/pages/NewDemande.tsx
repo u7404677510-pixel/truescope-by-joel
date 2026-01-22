@@ -1,15 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import DevisForm from '../components/DevisForm';
 import SolutionDisplay from '../components/SolutionDisplay';
-import { createDemandeWithFiles, validateDemande, getProblemType } from '../services/api';
+import { createDemandeWithFiles } from '../services/api';
 import type { Metier, AnalyseResponse } from '../types';
 import './NewDemande.css';
 
 function NewDemande() {
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [analyseResult, setAnalyseResult] = useState<AnalyseResponse | null>(null);
 
@@ -21,40 +18,13 @@ function NewDemande() {
       setAnalyseResult(result);
     } catch (err) {
       console.error('Erreur analyse:', err);
-      setError(err instanceof Error ? err.message : 'Erreur lors de l\'analyse');
+      setError(err instanceof Error ? err.message : 'Erreur lors de la création de la demande');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleValidate = async () => {
-    if (!analyseResult) return;
-
-    try {
-      setIsValidating(true);
-      setError(null);
-
-      // Récupérer le type de problème automatiquement
-      const problemType = await getProblemType(analyseResult.demande.id);
-
-      // Valider la demande avec la solution proposée
-      await validateDemande(
-        analyseResult.demande.id,
-        analyseResult.solution,
-        problemType
-      );
-
-      // Rediriger vers le dashboard avec un message de succès
-      navigate('/', { state: { message: 'Demande validée et enregistrée avec succès !' } });
-    } catch (err) {
-      console.error('Erreur validation:', err);
-      setError(err instanceof Error ? err.message : 'Erreur lors de la validation');
-    } finally {
-      setIsValidating(false);
-    }
-  };
-
-  const handleReset = () => {
+  const handleBack = () => {
     setAnalyseResult(null);
     setError(null);
   };
@@ -72,7 +42,7 @@ function NewDemande() {
 
       {error && (
         <div className="error-message">
-          <span className="error-icon">⚠️</span>
+          <span className="error-icon">!</span>
           <div>
             <strong>Erreur</strong>
             <p>{error}</p>
@@ -85,46 +55,12 @@ function NewDemande() {
         <DevisForm onSubmit={handleSubmit} isLoading={isLoading} />
       ) : (
         <div className="analyse-result">
-          <SolutionDisplay 
-            solution={analyseResult.solution}
-            confiance={analyseResult.confiance}
-            raisonnement={analyseResult.raisonnement}
-            interventionsSimilaires={analyseResult.interventionsSimilaires}
-          />
-
-          <div className="result-actions">
-            <button 
-              className="btn btn-secondary" 
-              onClick={handleReset}
-              disabled={isValidating}
-            >
-              ← Nouvelle analyse
-            </button>
-            <button 
-              className="btn btn-success"
-              onClick={handleValidate}
-              disabled={isValidating}
-            >
-              {isValidating ? (
-                <>
-                  <span className="spinner"></span>
-                  Validation...
-                </>
-              ) : (
-                <>
-                  ✓ Valider et enregistrer
-                </>
-              )}
-            </button>
-          </div>
-
-          <div className="validation-note">
-            <span className="note-icon">💡</span>
-            <p>
-              En validant cette solution, elle sera enregistrée comme intervention de référence.
-              Cela permettra à Joël de proposer des solutions plus précises pour les futures demandes similaires.
-            </p>
-          </div>
+          {/* Flèche retour en haut */}
+          <button className="back-arrow" onClick={handleBack}>
+            ← Nouvelle analyse
+          </button>
+          
+          <SolutionDisplay solution={analyseResult.solution} />
         </div>
       )}
     </div>

@@ -89,44 +89,26 @@
 
 /* Résultat d'analyse */
 .analyse-result {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.result-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--spacing-md);
+/* Flèche retour */
+.back-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0;
+  margin-bottom: 1rem;
+  background: none;
+  border: none;
+  color: var(--color-primary, #7c3aed);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
 }
 
-.result-actions .btn {
-  flex: 1;
-  justify-content: center;
-}
-
-.validation-note {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md) var(--spacing-lg);
-  background: rgba(158, 118, 236, 0.05);
-  border: 1px solid rgba(158, 118, 236, 0.15);
-  border-radius: var(--radius-md);
-}
-
-.note-icon {
-  font-size: 1.25rem;
-}
-
-.validation-note p {
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-  line-height: 1.6;
-}
-
-@media (max-width: 640px) {
-  .result-actions {
-    flex-direction: column;
-  }
+.back-arrow:hover {
+  opacity: 0.7;
 }

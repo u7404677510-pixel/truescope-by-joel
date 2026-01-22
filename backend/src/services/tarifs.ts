@@ -142,6 +142,30 @@ const TARIFS_ELECTRICITE_MA: Omit<Tarif, 'categorie' | 'metier'>[] = [
 ];
 
 // ============================================================
+// CACHE DES TARIFS (évite les appels répétés à Firebase)
+// ============================================================
+
+let tarifsCache: AllTarifs | null = null;
+let tarifsCacheTime: number = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function isCacheValid(): boolean {
+  return tarifsCache !== null && (Date.now() - tarifsCacheTime) < CACHE_TTL;
+}
+
+function setCache(tarifs: AllTarifs): void {
+  tarifsCache = tarifs;
+  tarifsCacheTime = Date.now();
+  console.log('📦 Cache tarifs mis à jour');
+}
+
+export function clearTarifsCache(): void {
+  tarifsCache = null;
+  tarifsCacheTime = 0;
+  console.log('🗑️ Cache tarifs vidé');
+}
+
+// ============================================================
 // FONCTIONS DE SERVICE
 // ============================================================
 
@@ -181,9 +205,14 @@ export function getDefaultTarifs(): AllTarifs {
 }
 
 /**
- * Récupère tous les tarifs depuis Firebase
+ * Récupère tous les tarifs depuis Firebase (avec cache)
  */
 export async function getAllTarifs(): Promise<AllTarifs> {
+  // Retourner le cache si valide
+  if (isCacheValid()) {
+    return tarifsCache!;
+  }
+
   try {
     const tarifsRef = db.collection('tarifs');
     const metiers: Metier[] = ['serrurerie', 'plomberie', 'electricite'];
@@ -217,45 +246,27 @@ export async function getAllTarifs(): Promise<AllTarifs> {
 
     if (totalTarifs === 0) {
       console.log('⚠️ Aucun tarif en base, utilisation des tarifs par défaut');
-      return getDefaultTarifs();
+      const defaults = getDefaultTarifs();
+      setCache(defaults);
+      return defaults;
     }
 
+    setCache(result);
     return result;
   } catch (error) {
     console.error('Erreur getAllTarifs:', error);
-    return getDefaultTarifs();
+    const defaults = getDefaultTarifs();
+    setCache(defaults);
+    return defaults;
   }
 }
 
 /**
- * Récupère les tarifs d'un métier spécifique
+ * Récupère les tarifs d'un métier spécifique (utilise le cache)
  */
 export async function getTarifsByMetier(metier: Metier): Promise<TarifsMetier> {
-  try {
-    const tarifsRef = db.collection('tarifs').doc(metier);
-    const categories: TarifCategorie[] = ['main_oeuvre', 'materiaux'];
-    
-    const result: TarifsMetier = { main_oeuvre: [], materiaux: [] };
-
-    for (const categorie of categories) {
-      const snapshot = await tarifsRef.collection(categorie).orderBy('code').get();
-      if (!snapshot.empty) {
-        result[categorie] = snapshot.docs.map(doc => doc.data() as Tarif);
-      }
-    }
-
-    // Si aucun tarif, retourner les valeurs par défaut pour ce métier
-    if (result.main_oeuvre.length === 0 && result.materiaux.length === 0) {
-      const defaults = getDefaultTarifs();
-      return defaults[metier];
-    }
-
-    return result;
-  } catch (error) {
-    console.error(`Erreur getTarifsByMetier(${metier}):`, error);
-    const defaults = getDefaultTarifs();
-    return defaults[metier];
-  }
+  const allTarifs = await getAllTarifs(); // Utilise le cache automatiquement
+  return allTarifs[metier];
 }
 
 /**
@@ -281,6 +292,7 @@ export async function updateTarif(
     }
 
     await tarifRef.update({ prix, updatedAt: new Date() });
+    clearTarifsCache(); // Invalider le cache
     
     const updated = await tarifRef.get();
     return updated.data() as Tarif;
@@ -329,7 +341,7 @@ export async function initializeTarifs(): Promise<{ success: boolean; count: num
 }
 
 /**
- * Recherche un tarif par son code
+ * Recherche un tarif par son code (utilise le cache)
  */
 export async function getTarifByCode(code: string): Promise<Tarif | null> {
   try {
@@ -345,21 +357,10 @@ export async function getTarifByCode(code: string): Promise<Tarif | null> {
 
     const categorie: TarifCategorie = type === 'MO' ? 'main_oeuvre' : 'materiaux';
 
-    const doc = await db
-      .collection('tarifs')
-      .doc(metier)
-      .collection(categorie)
-      .doc(code)
-      .get();
-
-    if (!doc.exists) {
-      // Chercher dans les valeurs par défaut
-      const defaults = getDefaultTarifs();
-      const tarifs = defaults[metier][categorie];
-      return tarifs.find(t => t.code === code) || null;
-    }
-
-    return doc.data() as Tarif;
+    // Utiliser le cache
+    const allTarifs = await getAllTarifs();
+    const tarifs = allTarifs[metier][categorie];
+    return tarifs.find(t => t.code === code) || null;
   } catch (error) {
     console.error(`Erreur getTarifByCode(${code}):`, error);
     return null;
@@ -438,6 +439,7 @@ export async function createTarif(
         updatedAt: new Date(),
       });
 
+    clearTarifsCache(); // Invalider le cache
     console.log(`✅ Nouveau tarif créé: ${code} - ${designation}`);
     return newTarif;
   } catch (error) {
@@ -468,6 +470,7 @@ export async function deleteTarif(
     }
 
     await tarifRef.delete();
+    clearTarifsCache(); // Invalider le cache
     console.log(`🗑️ Tarif supprimé: ${code}`);
     return true;
   } catch (error) {

@@ -1,157 +1,101 @@
 import { getGeminiModel, generationConfig } from '../config/gemini.js';
-import type { Metier, Intervention, Solution, LigneDevis, Variante, MediaFile, Materiel, Tarif } from '../types/index.js';
+import type { Metier, Intervention, Solution, MediaFile, LigneDevis, Tarif } from '../types/index.js';
 import { getTarifsByMetier, getTarifByCode } from './tarifs.js';
 
-// Prompts système pour chaque métier
-const METIER_CONTEXTS: Record<Metier, string> = {
-  serrurerie: `Tu es un expert en serrurerie avec 20 ans d'expérience. Tu connais parfaitement :
-- Les différents types de serrures (cylindre européen, à gorges, multipoints, etc.)
-- Les techniques d'ouverture de porte (crochetage, by-pass, perçage, etc.)
-- Les blindages de porte et leurs certifications (A2P BP1, BP2, BP3)
-- Les problèmes courants : porte claquée, clé cassée dans la serrure, serrure grippée, effraction`,
-
-  plomberie: `Tu es un expert en plomberie avec 20 ans d'expérience. Tu connais parfaitement :
-- Les différents types de tuyauterie (cuivre, PER, multicouche, PVC)
-- Les problèmes de fuite et leurs réparations
-- Les installations sanitaires (WC, lavabo, douche, baignoire)
-- Le chauffe-eau et la production d'eau chaude
-- Les problèmes courants : fuite, bouchon, chasse d'eau défectueuse, ballon qui fuit`,
-
-  electricite: `Tu es un expert en électricité avec 20 ans d'expérience. Tu connais parfaitement :
-- Les normes électriques (NF C 15-100)
-- Les tableaux électriques et disjoncteurs
-- Les problèmes de court-circuit et de surcharge
-- L'installation de prises, interrupteurs et éclairage
-- Les problèmes courants : panne de courant, disjoncteur qui saute, prise défectueuse, tableau brûlé`
+// Noms sympas pour chaque métier
+const METIER_NAMES: Record<Metier, string> = {
+  serrurerie: 'serrurerie',
+  plomberie: 'plomberie',
+  electricite: 'électricité'
 };
 
 // Formater les tarifs pour le prompt
 function formatTarifsForPrompt(tarifs: Tarif[]): string {
-  return tarifs.map(t => `  - ${t.code}: ${t.designation} (${t.prix}€/${t.unite})`).join('\n');
+  return tarifs.map(t => `  - ${t.code}: ${t.designation}`).join('\n');
 }
 
-// Prompt principal pour l'analyse
+// Prompt principal pour l'analyse TrueScope
 async function buildAnalysisPrompt(
   metier: Metier,
   description: string,
-  mediaUrls: string[],
-  interventionsSimilaires: Intervention[],
   uploadedMediaCount: number = 0
 ): Promise<string> {
-  const contextMetier = METIER_CONTEXTS[metier];
+  const metierName = METIER_NAMES[metier];
   
   // Récupérer les tarifs du métier
   const tarifsMetier = await getTarifsByMetier(metier);
   const tarifsMainOeuvre = formatTarifsForPrompt(tarifsMetier.main_oeuvre);
   const tarifsMateriaux = formatTarifsForPrompt(tarifsMetier.materiaux);
   
-  let similarContext = '';
-  if (interventionsSimilaires.length > 0) {
-    similarContext = `
-## Interventions similaires déjà réalisées (pour référence)
-${interventionsSimilaires.map((int, i) => `
-### Intervention ${i + 1} (${int.problemType})
-- Description: ${int.description}
-- Solution appliquée: ${int.solution.description}
-- Lignes de devis utilisées:
-${int.solution.lignesDevis.map(l => `  - ${l.code || ''} ${l.designation} (${l.quantite} ${l.unite})`).join('\n')}
-`).join('\n')}
-
-Utilise ces interventions comme référence pour proposer une solution cohérente.
-`;
-  }
-
   let mediaContext = '';
   if (uploadedMediaCount > 0) {
-    mediaContext = `\n## Photos fournies\nLe client a fourni ${uploadedMediaCount} photo(s) du problème qui sont jointes à ce message. ANALYSE CES IMAGES ATTENTIVEMENT pour identifier:
-- L'état des éléments concernés (serrure, tuyau, tableau électrique, etc.)
-- Les dégâts visibles
-- Le type d'équipement/matériel
-- Tout détail pertinent pour le diagnostic
-
-Base ton diagnostic sur ces photos en plus de la description textuelle.`;
-  } else if (mediaUrls.length > 0) {
-    mediaContext = `\n## Médias mentionnés\nLe client a mentionné ${mediaUrls.length} photo(s)/vidéo(s) du problème.`;
+    mediaContext = `\n\nLe client a fourni ${uploadedMediaCount} photo(s) du problème. ANALYSE CES IMAGES pour mieux comprendre la situation.`;
   }
 
-  return `${contextMetier}
+  return `Tu es TrueScope, un assistant sympa qui aide les gens à comprendre leurs problèmes de ${metierName}.
 
-# Mission
-Tu dois analyser une demande de devis et proposer une solution technique structurée EN UTILISANT LES CODES TARIFS FOURNIS.
+## Ton style
+- Parle comme un ami qui s'y connaît
+- Sois rassurant mais honnête  
+- Un peu d'humour, sans en faire trop
+- Pas de jargon technique (ou explique simplement)
+- Tutoie l'utilisateur
+- Sois concis et va droit au but
 
-## GRILLE TARIFAIRE À UTILISER
-Tu DOIS utiliser les codes tarifs suivants pour les lignes de devis. Choisis les codes les plus appropriés.
+## CODES TARIFS DISPONIBLES
+Tu DOIS utiliser ces codes pour les lignes de devis :
 
-### Main d'œuvre disponible:
+### Main d'œuvre:
 ${tarifsMainOeuvre}
 
-### Matériaux disponibles:
+### Matériaux:
 ${tarifsMateriaux}
 
-## Règles IMPORTANTES
-1. Tu DOIS utiliser les CODES TARIFS (ex: SER-MO-002) dans tes lignes de devis.
-2. Tu dois être précis et professionnel dans ton diagnostic.
-3. Si plusieurs solutions sont possibles, propose des variantes.
-4. Base-toi sur les interventions similaires si disponibles.
-5. Liste TOUT le matériel nécessaire pour réaliser l'intervention.
-6. Si tu détectes des MARQUES (ex: Fichet, Vachette, Grohe, Legrand), mentionne-les.
-7. TOUJOURS inclure le déplacement dans les lignes de devis.
+## Problème décrit par l'utilisateur
+"${description}"${mediaContext}
 
-## Demande du client
-**Métier**: ${metier}
-**Description du problème**: ${description}
-${mediaContext}
-${similarContext}
+## Ta mission
+Réponds en JSON avec ces 5 sections :
 
-## Format de réponse attendu (JSON strict)
-Réponds UNIQUEMENT avec un objet JSON valide, sans commentaires ni texte avant ou après :
+1. **descriptionProbleme** : Reformule ce que tu as compris du problème en 2-3 phrases max. Commence par "OK, je vois..." ou "Ah, classique ça..." ou "Hmm, intéressant...".
+
+2. **solutionTrueScope** : Explique simplement ce qu'il faut faire pour résoudre ça. 2-4 phrases max. Donne une idée du temps que ça prend.
+
+3. **propositionJoel** : UNE SEULE phrase accrocheuse qui donne envie de contacter un pro. Genre "Un artisan peut régler ça en 30 min chrono !"
+
+4. **lignesDevis** : Liste des interventions nécessaires avec les CODES TARIFS. Inclus TOUJOURS le déplacement.
+
+5. **conseilsPrevention** : 2-3 conseils COURTS pour éviter que ça se reproduise.
+
+## Format de réponse (JSON strict)
 {
-  "diagnostic": "Description détaillée du problème identifié",
-  "description": "Description de la solution principale proposée",
-  "materiel": [
-    {
-      "nom": "Nom du matériel/pièce/outil",
-      "quantite": 1,
-      "marque": "Marque si connue (optionnel)",
-      "specifications": "Caractéristiques techniques (optionnel)"
-    }
-  ],
+  "descriptionProbleme": "Ta reformulation sympa",
+  "solutionTrueScope": "L'explication simple de la solution",
+  "propositionJoel": "Ta phrase d'accroche pour contacter Joël",
   "lignesDevis": [
-    {
-      "code": "CODE_TARIF (ex: SER-MO-001)",
-      "designation": "Nom de la prestation",
-      "unite": "unité (forfait, ml, pièce, etc.)",
-      "quantite": 1,
-      "notes": "notes optionnelles"
-    }
+    { "code": "XXX-MO-001", "designation": "Déplacement", "unite": "forfait", "quantite": 1 },
+    { "code": "XXX-MO-XXX", "designation": "...", "unite": "forfait", "quantite": 1 }
   ],
-  "variantes": [
-    {
-      "nom": "Nom de la variante",
-      "description": "Description de cette alternative",
-      "lignesDevis": [{ "code": "...", "designation": "...", "unite": "...", "quantite": 1 }],
-      "avantages": ["avantage 1"],
-      "inconvenients": ["inconvénient 1"]
-    }
-  ],
-  "recommandations": ["conseil 1", "conseil 2"],
-  "raisonnement": "Explication de ton analyse"
+  "conseilsPrevention": ["Conseil 1", "Conseil 2", "Conseil 3"]
 }
 `;
 }
 
 // Interface pour la réponse parsée de Gemini
 interface GeminiAnalysisResponse {
-  diagnostic: string;
-  description: string;
-  materiel: Materiel[];
-  lignesDevis: LigneDevis[];
-  variantes?: Variante[];
-  recommandations?: string[];
-  raisonnement: string;
+  descriptionProbleme: string;
+  solutionTrueScope: string;
+  propositionJoel: string;
+  lignesDevis: Array<{
+    code?: string;
+    designation: string;
+    unite: string;
+    quantite: number;
+  }>;
+  conseilsPrevention: string[];
 }
 
-// Enrichir les lignes de devis avec les prix
+// Enrichir les lignes de devis avec les prix de la base
 async function enrichLignesDevisWithPrices(lignes: LigneDevis[]): Promise<LigneDevis[]> {
   const enriched: LigneDevis[] = [];
   
@@ -159,20 +103,16 @@ async function enrichLignesDevisWithPrices(lignes: LigneDevis[]): Promise<LigneD
     if (ligne.code) {
       const tarif = await getTarifByCode(ligne.code);
       if (tarif) {
-        // ✅ Tarif trouvé dans la base - on utilise le prix de la base
         enriched.push({
           ...ligne,
           designation: tarif.designation,
           unite: tarif.unite,
           prixUnitaire: tarif.prix,
-          prixTotal: tarif.unite === '%' 
-            ? undefined // Les majorations sont des pourcentages
-            : tarif.prix * ligne.quantite,
+          prixTotal: tarif.unite === '%' ? undefined : tarif.prix * ligne.quantite,
           tarifManquant: false,
         });
       } else {
-        // ⚠️ Tarif NON trouvé - on marque comme manquant, PAS de prix inventé
-        console.warn(`⚠️ Tarif ${ligne.code} non trouvé dans la base de données`);
+        console.warn(`⚠️ Tarif ${ligne.code} non trouvé dans la base`);
         enriched.push({
           ...ligne,
           tarifManquant: true,
@@ -181,7 +121,6 @@ async function enrichLignesDevisWithPrices(lignes: LigneDevis[]): Promise<LigneD
         });
       }
     } else {
-      // Ligne sans code tarif - on marque comme manquant
       enriched.push({
         ...ligne,
         tarifManquant: true,
@@ -194,24 +133,23 @@ async function enrichLignesDevisWithPrices(lignes: LigneDevis[]): Promise<LigneD
   return enriched;
 }
 
-// Service d'analyse Gemini
+// Service d'analyse Gemini - Version TrueScope
 export async function analyzeWithGemini(
   metier: Metier,
   description: string,
   mediaUrls: string[],
   interventionsSimilaires: Intervention[],
   mediaFiles: MediaFile[] = []
-): Promise<{ solution: Solution; raisonnement: string }> {
+): Promise<{ solution: Solution }> {
   const model = getGeminiModel();
   
-  const prompt = await buildAnalysisPrompt(metier, description, mediaUrls, interventionsSimilaires, mediaFiles.length);
+  const prompt = await buildAnalysisPrompt(metier, description, mediaFiles.length);
 
   // Préparer le contenu avec les images si disponibles
   const contentParts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [{ text: prompt }];
 
   // Ajouter les images uploadées pour analyse visuelle
   for (const mediaFile of mediaFiles) {
-    // Ne traiter que les images (pas les vidéos pour l'instant)
     if (mediaFile.mimeType.startsWith('image/')) {
       contentParts.push({
         inlineData: {
@@ -241,32 +179,18 @@ export async function analyzeWithGemini(
     const parsed: GeminiAnalysisResponse = JSON.parse(jsonMatch[0]);
 
     // Enrichir les lignes de devis avec les prix
-    const lignesDevisEnrichies = await enrichLignesDevisWithPrices(parsed.lignesDevis);
-    
-    // Enrichir les variantes aussi
-    let variantesEnrichies: Variante[] | undefined;
-    if (parsed.variantes) {
-      variantesEnrichies = await Promise.all(
-        parsed.variantes.map(async (v) => ({
-          ...v,
-          lignesDevis: await enrichLignesDevisWithPrices(v.lignesDevis),
-        }))
-      );
-    }
+    const lignesDevisEnrichies = await enrichLignesDevisWithPrices(parsed.lignesDevis || []);
 
+    // Construire la solution
     const solution: Solution = {
-      diagnostic: parsed.diagnostic,
-      description: parsed.description,
-      materiel: parsed.materiel || [],
+      descriptionProbleme: parsed.descriptionProbleme,
+      solutionTrueScope: parsed.solutionTrueScope,
+      propositionJoel: parsed.propositionJoel,
       lignesDevis: lignesDevisEnrichies,
-      variantes: variantesEnrichies,
-      recommandations: parsed.recommandations,
+      conseilsPrevention: parsed.conseilsPrevention || [],
     };
 
-    return {
-      solution,
-      raisonnement: parsed.raisonnement,
-    };
+    return { solution };
   } catch (error) {
     console.error('Erreur lors de l\'appel à Gemini:', error);
     throw new Error(`Erreur d'analyse Gemini: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
@@ -302,7 +226,6 @@ Exemple: ["serrure", "cylindre européen", "porte blindée", "ouverture", "urgen
       return JSON.parse(jsonMatch[0]);
     }
     
-    // Fallback: extraire les mots importants manuellement
     return [metier, problemType, ...description.toLowerCase().split(/\s+/).filter(w => w.length > 4).slice(0, 5)];
   } catch (error) {
     console.error('Erreur extraction mots-clés:', error);

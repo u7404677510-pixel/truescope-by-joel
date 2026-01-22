@@ -50,8 +50,8 @@ export class JoelCore {
     console.log(`📊 ${interventionsSimilaires.length} intervention(s) similaire(s) trouvée(s)`);
     
     // 4. Analyser avec Gemini (avec les images si fournies)
-    console.log(`🤖 Analyse avec Gemini...${mediaFiles.length > 0 ? ` (avec ${mediaFiles.length} image(s))` : ''}`);
-    const { solution, raisonnement } = await analyzeWithGemini(
+    console.log(`🤖 Analyse TrueScope...${mediaFiles.length > 0 ? ` (avec ${mediaFiles.length} image(s))` : ''}`);
+    const { solution } = await analyzeWithGemini(
       metier,
       description,
       mediaUrls,
@@ -66,18 +66,16 @@ export class JoelCore {
     demande.status = 'analyzed';
     demande.solutionProposee = solution;
     demande.interventionsSimilaires = interventionsSimilaires.map(i => i.id);
-    demande.raisonnementIA = raisonnement;
     demande.updatedAt = new Date();
 
     await this.saveDemande(demande);
 
-    console.log(`✅ Analyse terminée pour demande ${demandeId}`);
+    console.log(`✅ Diagnostic TrueScope terminé pour demande ${demandeId}`);
 
     return {
       demande,
       interventionsSimilaires,
       solution,
-      raisonnement,
       confiance,
     };
   }
