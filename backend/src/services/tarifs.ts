@@ -214,6 +214,12 @@ export async function getAllTarifs(): Promise<AllTarifs> {
   }
 
   try {
+    if (!db) {
+      console.log('⚠️ Firebase non initialisé, utilisation des tarifs par défaut');
+      const defaults = getDefaultTarifs();
+      setCache(defaults);
+      return defaults;
+    }
     const tarifsRef = db.collection('tarifs');
     const metiers: Metier[] = ['serrurerie', 'plomberie', 'electricite'];
     const categories: TarifCategorie[] = ['main_oeuvre', 'materiaux'];
@@ -278,6 +284,10 @@ export async function updateTarif(
   code: string,
   prix: number
 ): Promise<Tarif | null> {
+  if (!db) {
+    console.error('Firebase non initialisé');
+    return null;
+  }
   try {
     const tarifRef = db
       .collection('tarifs')
@@ -306,6 +316,10 @@ export async function updateTarif(
  * Initialise les tarifs dans Firebase avec les valeurs par défaut
  */
 export async function initializeTarifs(): Promise<{ success: boolean; count: number }> {
+  if (!db) {
+    console.error('Firebase non initialisé');
+    return { success: false, count: 0 };
+  }
   try {
     const defaultTarifs = getDefaultTarifs();
     const metiers: Metier[] = ['serrurerie', 'plomberie', 'electricite'];
@@ -381,6 +395,10 @@ export async function getNextCode(metier: Metier, categorie: TarifCategorie): Pr
   const prefix = metier === 'serrurerie' ? 'SER' : metier === 'plomberie' ? 'PLO' : 'ELE';
   const typeCode = categorie === 'main_oeuvre' ? 'MO' : 'MA';
   
+  if (!db) {
+    return `${prefix}-${typeCode}-001`;
+  }
+  
   try {
     const snapshot = await db
       .collection('tarifs')
@@ -416,6 +434,10 @@ export async function createTarif(
   prix: number,
   unite: string
 ): Promise<Tarif | null> {
+  if (!db) {
+    console.error('Firebase non initialisé');
+    return null;
+  }
   try {
     const code = await getNextCode(metier, categorie);
     
@@ -456,6 +478,10 @@ export async function deleteTarif(
   categorie: TarifCategorie,
   code: string
 ): Promise<boolean> {
+  if (!db) {
+    console.error('Firebase non initialisé');
+    return false;
+  }
   try {
     const tarifRef = db
       .collection('tarifs')

@@ -1,6 +1,7 @@
 {
   "name": "joel-wrapper-backend",
   "version": "1.0.0",
+  "type": "module",
   "description": "Wrapper Joel - Systeme intelligent de devis pour serrurerie, plomberie et electricite",
   "main": "dist/server.js",
   "scripts": {
