@@ -1,6 +1,7 @@
 import type { Metier, Demande, Intervention, AnalyseResponse, Solution } from '../types';
 
-const API_BASE = '/api';
+// En production, utiliser le backend Render. En dev, utiliser le proxy local.
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 interface ApiResponse<T> {
   success: boolean;
