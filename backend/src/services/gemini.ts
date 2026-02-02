@@ -1,6 +1,5 @@
 import { getGeminiModel, generationConfig } from '../config/gemini.js';
-import type { Metier, Intervention, Solution, MediaFile, LigneDevis, Tarif } from '../types/index.js';
-import { getTarifsByMetier, getTarifByCode } from './tarifs.js';
+import type { Metier, Intervention, Solution, MediaFile } from '../types/index.js';
 
 // Noms sympas pour chaque métier
 const METIER_NAMES: Record<Metier, string> = {
@@ -9,23 +8,13 @@ const METIER_NAMES: Record<Metier, string> = {
   electricite: 'électricité'
 };
 
-// Formater les tarifs pour le prompt
-function formatTarifsForPrompt(tarifs: Tarif[]): string {
-  return tarifs.map(t => `  - ${t.code}: ${t.designation}`).join('\n');
-}
-
-// Prompt principal pour l'analyse TrueScope
-async function buildAnalysisPrompt(
+// Prompt principal pour l'analyse TrueScope (diagnostic GRATUIT, sans prix)
+function buildAnalysisPrompt(
   metier: Metier,
   description: string,
   uploadedMediaCount: number = 0
-): Promise<string> {
+): string {
   const metierName = METIER_NAMES[metier];
-  
-  // Récupérer les tarifs du métier
-  const tarifsMetier = await getTarifsByMetier(metier);
-  const tarifsMainOeuvre = formatTarifsForPrompt(tarifsMetier.main_oeuvre);
-  const tarifsMateriaux = formatTarifsForPrompt(tarifsMetier.materiaux);
   
   let mediaContext = '';
   if (uploadedMediaCount > 0) {
@@ -42,20 +31,11 @@ async function buildAnalysisPrompt(
 - Tutoie l'utilisateur
 - Sois concis et va droit au but
 
-## CODES TARIFS DISPONIBLES
-Tu DOIS utiliser ces codes pour les lignes de devis :
-
-### Main d'œuvre:
-${tarifsMainOeuvre}
-
-### Matériaux:
-${tarifsMateriaux}
-
 ## Problème décrit par l'utilisateur
 "${description}"${mediaContext}
 
 ## Ta mission
-Réponds en JSON avec ces 5 sections :
+Réponds en JSON avec ces 4 sections :
 
 1. **descriptionProbleme** : Reformule ce que tu as compris du problème en 2-3 phrases max. Commence par "OK, je vois..." ou "Ah, classique ça..." ou "Hmm, intéressant...".
 
@@ -63,19 +43,13 @@ Réponds en JSON avec ces 5 sections :
 
 3. **propositionJoel** : UNE SEULE phrase accrocheuse qui donne envie de contacter un pro. Genre "Un artisan peut régler ça en 30 min chrono !"
 
-4. **lignesDevis** : Liste des interventions nécessaires avec les CODES TARIFS. Inclus TOUJOURS le déplacement.
-
-5. **conseilsPrevention** : 2-3 conseils COURTS pour éviter que ça se reproduise.
+4. **conseilsPrevention** : 2-3 conseils COURTS pour éviter que ça se reproduise.
 
 ## Format de réponse (JSON strict)
 {
   "descriptionProbleme": "Ta reformulation sympa",
   "solutionTrueScope": "L'explication simple de la solution",
   "propositionJoel": "Ta phrase d'accroche pour contacter Joël",
-  "lignesDevis": [
-    { "code": "XXX-MO-001", "designation": "Déplacement", "unite": "forfait", "quantite": 1 },
-    { "code": "XXX-MO-XXX", "designation": "...", "unite": "forfait", "quantite": 1 }
-  ],
   "conseilsPrevention": ["Conseil 1", "Conseil 2", "Conseil 3"]
 }
 `;
@@ -86,54 +60,10 @@ interface GeminiAnalysisResponse {
   descriptionProbleme: string;
   solutionTrueScope: string;
   propositionJoel: string;
-  lignesDevis: Array<{
-    code?: string;
-    designation: string;
-    unite: string;
-    quantite: number;
-  }>;
   conseilsPrevention: string[];
 }
 
-// Enrichir les lignes de devis avec les prix de la base
-async function enrichLignesDevisWithPrices(lignes: LigneDevis[]): Promise<LigneDevis[]> {
-  const enriched: LigneDevis[] = [];
-  
-  for (const ligne of lignes) {
-    if (ligne.code) {
-      const tarif = await getTarifByCode(ligne.code);
-      if (tarif) {
-        enriched.push({
-          ...ligne,
-          designation: tarif.designation,
-          unite: tarif.unite,
-          prixUnitaire: tarif.prix,
-          prixTotal: tarif.unite === '%' ? undefined : tarif.prix * ligne.quantite,
-          tarifManquant: false,
-        });
-      } else {
-        console.warn(`⚠️ Tarif ${ligne.code} non trouvé dans la base`);
-        enriched.push({
-          ...ligne,
-          tarifManquant: true,
-          prixUnitaire: undefined,
-          prixTotal: undefined,
-        });
-      }
-    } else {
-      enriched.push({
-        ...ligne,
-        tarifManquant: true,
-        prixUnitaire: undefined,
-        prixTotal: undefined,
-      });
-    }
-  }
-  
-  return enriched;
-}
-
-// Service d'analyse Gemini - Version TrueScope
+// Service d'analyse Gemini - Version TrueScope (diagnostic GRATUIT)
 export async function analyzeWithGemini(
   metier: Metier,
   description: string,
@@ -143,7 +73,7 @@ export async function analyzeWithGemini(
 ): Promise<{ solution: Solution }> {
   const model = getGeminiModel();
   
-  const prompt = await buildAnalysisPrompt(metier, description, mediaFiles.length);
+  const prompt = buildAnalysisPrompt(metier, description, mediaFiles.length);
 
   // Préparer le contenu avec les images si disponibles
   const contentParts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [{ text: prompt }];
@@ -178,15 +108,11 @@ export async function analyzeWithGemini(
 
     const parsed: GeminiAnalysisResponse = JSON.parse(jsonMatch[0]);
 
-    // Enrichir les lignes de devis avec les prix
-    const lignesDevisEnrichies = await enrichLignesDevisWithPrices(parsed.lignesDevis || []);
-
-    // Construire la solution
+    // Construire la solution (sans prix, c'est un diagnostic GRATUIT)
     const solution: Solution = {
       descriptionProbleme: parsed.descriptionProbleme,
       solutionTrueScope: parsed.solutionTrueScope,
       propositionJoel: parsed.propositionJoel,
-      lignesDevis: lignesDevisEnrichies,
       conseilsPrevention: parsed.conseilsPrevention || [],
     };
 
