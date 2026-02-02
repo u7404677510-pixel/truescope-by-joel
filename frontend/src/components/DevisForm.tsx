@@ -69,6 +69,8 @@ function DevisForm({ onSubmit, isLoading = false }: DevisFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Ne soumettre que si on est à l'étape 3
+    if (currentStep !== 3) return;
     if (!metier || !description.trim()) return;
 
     onSubmit({
