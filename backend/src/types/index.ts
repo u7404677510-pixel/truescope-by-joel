@@ -29,11 +29,23 @@ export interface AllTarifs {
   electricite: TarifsMetier;
 }
 
-// Solution TrueScope - Format simplifié pour l'utilisateur
+// Ligne de devis (avec prix calculé depuis les tarifs)
+export interface LigneDevis {
+  code?: string;
+  designation: string;
+  unite: string;
+  quantite: number;
+  prixUnitaire?: number;
+  prixTotal?: number;
+  tarifManquant?: boolean;
+}
+
+// Solution TrueScope - Format pour l'utilisateur avec devis
 export interface Solution {
   descriptionProbleme: string;    // Ce qu'on a compris du problème
   solutionTrueScope: string;      // Comment résoudre le problème
   propositionJoel: string;        // Phrase d'accroche pour contacter Joël
+  lignesDevis: LigneDevis[];      // Détail de l'intervention avec prix
   conseilsPrevention: string[];   // Conseils pour éviter que ça se reproduise
 }
 
