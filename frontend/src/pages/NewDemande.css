@@ -51,8 +51,8 @@
 /* Mobile - Hero compact */
 @media (max-width: 640px) {
   .truescope-hero {
-    padding: var(--spacing-sm) 0;
-    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-xs) 0;
+    margin-bottom: var(--spacing-md);
   }
   
   .hero-welcome {
@@ -64,10 +64,16 @@
     font-size: 2rem;
   }
   
+  .hero-title-wrapper {
+    margin-bottom: var(--spacing-sm);
+  }
+  
   .hero-byline {
     font-size: 0.6rem;
-    right: -20px;
-    bottom: -8px;
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: -14px;
   }
 }
 
