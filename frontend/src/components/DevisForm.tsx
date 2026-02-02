@@ -121,7 +121,10 @@ function DevisForm({ onSubmit, isLoading = false }: DevisFormProps) {
                 key={m.value}
                 type="button"
                 className={`metier-card ${metier === m.value ? 'selected' : ''} ${m.value}`}
-                onClick={() => setMetier(m.value)}
+                onClick={() => {
+                  setMetier(m.value);
+                  setCurrentStep(2); // Passe directement à l'étape 2
+                }}
               >
                 <span className="metier-icon">{m.icon}</span>
                 <span className="metier-label">{m.label}</span>
@@ -168,9 +171,9 @@ function DevisForm({ onSubmit, isLoading = false }: DevisFormProps) {
         </div>
       )}
 
-      {/* Navigation */}
-      <div className="step-navigation">
-        {currentStep > 1 && (
+      {/* Navigation - pas affichée à l'étape 1 */}
+      {currentStep > 1 && (
+        <div className="step-navigation">
           <button 
             type="button" 
             className="btn btn-secondary"
@@ -178,36 +181,36 @@ function DevisForm({ onSubmit, isLoading = false }: DevisFormProps) {
           >
             ← Précédent
           </button>
-        )}
-        
-        <div className="nav-spacer" />
+          
+          <div className="nav-spacer" />
 
-        {currentStep < totalSteps ? (
-          <button 
-            type="button" 
-            className="btn btn-primary"
-            onClick={goNext}
-            disabled={!canGoNext()}
-          >
-            Suivant →
-          </button>
-        ) : (
-          <button 
-            type="submit" 
-            className="btn btn-primary submit-btn"
-            disabled={!metier || !description.trim() || isLoading}
-          >
-            {isLoading ? (
-              <>
-                <span className="spinner"></span>
-                Analyse en cours...
-              </>
-            ) : (
-              'Analyser avec Joël'
-            )}
-          </button>
-        )}
-      </div>
+          {currentStep < totalSteps ? (
+            <button 
+              type="button" 
+              className="btn btn-primary"
+              onClick={goNext}
+              disabled={!canGoNext()}
+            >
+              Suivant →
+            </button>
+          ) : (
+            <button 
+              type="submit" 
+              className="btn btn-primary submit-btn"
+              disabled={!metier || !description.trim() || isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span className="spinner"></span>
+                  Analyse en cours...
+                </>
+              ) : (
+                'Analyser avec Joël'
+              )}
+            </button>
+          )}
+        </div>
+      )}
     </form>
   );
 }
