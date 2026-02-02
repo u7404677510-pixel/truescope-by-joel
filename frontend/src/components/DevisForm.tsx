@@ -67,9 +67,14 @@ function DevisForm({ onSubmit, isLoading = false }: DevisFormProps) {
     setMediaFiles(files);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Bloquer toute soumission automatique du formulaire
+  const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Ne soumettre que si on est à l'étape 3
+    // Ne rien faire - on utilise handleAnalyze pour soumettre
+  };
+
+  // Lancer l'analyse uniquement quand on clique sur le bouton
+  const handleAnalyze = () => {
     if (currentStep !== 3) return;
     if (!metier || !description.trim()) return;
 
@@ -99,7 +104,7 @@ function DevisForm({ onSubmit, isLoading = false }: DevisFormProps) {
   };
 
   return (
-    <form className="devis-form" onSubmit={handleSubmit}>
+    <form className="devis-form" onSubmit={handleFormSubmit}>
       {/* Indicateur de progression */}
       <div className="step-indicator">
         <div className="step-progress">
@@ -196,9 +201,10 @@ function DevisForm({ onSubmit, isLoading = false }: DevisFormProps) {
             </button>
           ) : (
             <button 
-              type="submit" 
+              type="button" 
               className="btn btn-primary submit-btn"
               disabled={!metier || !description.trim() || isLoading}
+              onClick={handleAnalyze}
             >
               {isLoading ? (
                 <>
