@@ -225,12 +225,72 @@
 }
 
 @media (max-width: 640px) {
-  .metier-grid {
-    grid-template-columns: 1fr;
+  .devis-form {
+    gap: var(--spacing-sm);
+  }
+  
+  .step-indicator {
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .step-progress {
+    max-width: 200px;
+    height: 4px;
+  }
+  
+  .step-label {
+    font-size: 0.75rem;
   }
   
   .form-section {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
+  }
+  
+  .section-title {
+    font-size: 1rem;
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .metier-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  
+  .metier-card {
+    padding: var(--spacing-md);
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--spacing-md);
+  }
+  
+  .metier-icon {
+    flex-shrink: 0;
+  }
+  
+  .metier-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .metier-label {
+    font-size: 0.9375rem;
+  }
+  
+  .metier-desc {
+    display: none;
+  }
+  
+  .description-input {
+    min-height: 100px;
+  }
+  
+  .step-navigation {
+    margin-top: var(--spacing-sm);
+  }
+  
+  .step-navigation .btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
   }
   
   .submit-btn {

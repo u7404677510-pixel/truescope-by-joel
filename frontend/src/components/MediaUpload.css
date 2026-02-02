@@ -181,7 +181,28 @@
 }
 
 @media (max-width: 640px) {
+  .drop-zone {
+    padding: var(--spacing-md);
+  }
+  
+  .drop-icon {
+    font-size: 1.75rem;
+  }
+  
+  .drop-main {
+    font-size: 0.875rem;
+  }
+  
+  .drop-sub {
+    font-size: 0.75rem;
+  }
+  
+  .drop-hint {
+    font-size: 0.6875rem;
+  }
+  
   .files-preview {
     grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-sm);
   }
 }

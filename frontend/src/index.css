@@ -525,6 +525,12 @@ input, textarea, select {
   }
 }
 
+@media (max-width: 640px) {
+  .main-content {
+    padding: var(--spacing-sm);
+  }
+}
+
 @media (max-width: 480px) {
   .stats-grid {
     grid-template-columns: 1fr;
