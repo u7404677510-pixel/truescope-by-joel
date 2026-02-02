@@ -147,7 +147,6 @@ function DevisForm({ onSubmit, isLoading = false }: DevisFormProps) {
               placeholder="Décrivez précisément votre problème...&#10;&#10;Exemple: Ma porte d'entrée est claquée. C'est une porte blindée, serrure 3 points. Je n'ai pas de double des clés."
               value={description}
               onChange={e => setDescription(e.target.value)}
-              autoFocus
             />
             <div className="char-count">{description.length} caractères</div>
           </div>
