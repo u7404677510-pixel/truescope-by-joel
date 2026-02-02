@@ -11,7 +11,8 @@ function App() {
     <Routes>
       {/* Routes Admin (sans Header Joël) */}
       <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<Navigate to="/admin/tarifs" replace />} />
+        <Route index element={<Navigate to="/admin/historique" replace />} />
+        <Route path="historique" element={<Historique />} />
         <Route path="tarifs" element={<TarifsEditor />} />
       </Route>
 
@@ -26,7 +27,6 @@ function App() {
                 <Route path="/" element={<Navigate to="/nouvelle-demande" replace />} />
                 <Route path="/nouvelle-demande" element={<NewDemande />} />
                 <Route path="/demande/:id" element={<DemandeDetail />} />
-                <Route path="/historique" element={<Historique />} />
               </Routes>
             </main>
           </div>

@@ -24,12 +24,6 @@ function Header() {
           >
             Nouvelle demande
           </Link>
-          <Link 
-            to="/historique" 
-            className={`nav-link ${isActive('/historique') ? 'active' : ''}`}
-          >
-            Historique
-          </Link>
         </nav>
       </div>
     </header>

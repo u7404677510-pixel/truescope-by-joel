@@ -29,23 +29,11 @@ export interface AllTarifs {
   electricite: TarifsMetier;
 }
 
-// Ligne de devis (avec prix calculé depuis les tarifs)
-export interface LigneDevis {
-  code?: string;         // Code tarif (ex: "SER-MO-001")
-  designation: string;
-  unite: string;
-  quantite: number;
-  prixUnitaire?: number; // Prix unitaire HT
-  prixTotal?: number;    // Prix total ligne
-  tarifManquant?: boolean;
-}
-
-// Solution TrueScope - Format pour l'utilisateur
+// Solution TrueScope - Format simplifié pour l'utilisateur
 export interface Solution {
   descriptionProbleme: string;    // Ce qu'on a compris du problème
   solutionTrueScope: string;      // Comment résoudre le problème
   propositionJoel: string;        // Phrase d'accroche pour contacter Joël
-  lignesDevis: LigneDevis[];      // Détail de l'intervention avec prix
   conseilsPrevention: string[];   // Conseils pour éviter que ça se reproduise
 }
 
