@@ -59,6 +59,9 @@ function DevisForm({ onSubmit, isLoading = false }: DevisFormProps) {
   const [metier, setMetier] = useState<Metier | ''>('');
   const [description, setDescription] = useState('');
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
+  const [currentStep, setCurrentStep] = useState(1);
+
+  const totalSteps = 3;
 
   const handleFilesChange = useCallback((files: MediaFile[]) => {
     setMediaFiles(files);
@@ -75,76 +78,135 @@ function DevisForm({ onSubmit, isLoading = false }: DevisFormProps) {
     });
   };
 
+  const canGoNext = () => {
+    if (currentStep === 1) return metier !== '';
+    if (currentStep === 2) return description.trim().length > 0;
+    return true;
+  };
+
+  const goNext = () => {
+    if (canGoNext() && currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const goPrev = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
   return (
     <form className="devis-form" onSubmit={handleSubmit}>
-      <div className="form-section">
-        <h3 className="section-title">
-          <span className="section-number">1</span>
-          Choisissez le métier concerné
-        </h3>
-        <div className="metier-grid">
-          {METIERS.map(m => (
-            <button
-              key={m.value}
-              type="button"
-              className={`metier-card ${metier === m.value ? 'selected' : ''} ${m.value}`}
-              onClick={() => setMetier(m.value)}
-            >
-              <span className="metier-icon">{m.icon}</span>
-              <span className="metier-label">{m.label}</span>
-              <span className="metier-desc">{m.description}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="form-section">
-        <h3 className="section-title">
-          <span className="section-number">2</span>
-          Décrivez le problème
-        </h3>
-        <div className="form-group">
-          <textarea
-            className="form-textarea description-input"
-            placeholder="Décrivez précisément la situation du client...&#10;&#10;Exemple: Le client a claqué sa porte d'entrée. C'est une porte blindée de marque Fichet, serrure 3 points. Il n'a pas de double des clés."
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            required
+      {/* Indicateur de progression */}
+      <div className="step-indicator">
+        <div className="step-progress">
+          <div 
+            className="step-progress-bar" 
+            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
           />
-          <div className="char-count">{description.length} caractères</div>
         </div>
+        <span className="step-label">Étape {currentStep}/{totalSteps}</span>
       </div>
 
-      <div className="form-section">
-        <h3 className="section-title">
-          <span className="section-number">3</span>
-          Photos / Vidéos <span className="optional">(optionnel)</span>
-        </h3>
-        <MediaUpload 
-          onFilesChange={handleFilesChange}
-          maxFiles={5}
-          maxSizeMB={10}
-        />
-        <div className="help-text">
-          Les photos permettent à Joël de mieux analyser la situation
+      {/* Étape 1: Choix du métier */}
+      {currentStep === 1 && (
+        <div className="form-section step-content">
+          <h3 className="section-title">
+            Quel est votre problème ?
+          </h3>
+          <div className="metier-grid">
+            {METIERS.map(m => (
+              <button
+                key={m.value}
+                type="button"
+                className={`metier-card ${metier === m.value ? 'selected' : ''} ${m.value}`}
+                onClick={() => setMetier(m.value)}
+              >
+                <span className="metier-icon">{m.icon}</span>
+                <span className="metier-label">{m.label}</span>
+                <span className="metier-desc">{m.description}</span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="form-actions">
-        <button 
-          type="submit" 
-          className="btn btn-primary submit-btn"
-          disabled={!metier || !description.trim() || isLoading}
-        >
-          {isLoading ? (
-            <>
-              <span className="spinner"></span>
-              Analyse en cours...
-            </>
-          ) : (
-            'Analyser avec Joël'
-          )}
-        </button>
+      {/* Étape 2: Description */}
+      {currentStep === 2 && (
+        <div className="form-section step-content">
+          <h3 className="section-title">
+            Décrivez votre situation
+          </h3>
+          <div className="form-group">
+            <textarea
+              className="form-textarea description-input"
+              placeholder="Décrivez précisément votre problème...&#10;&#10;Exemple: Ma porte d'entrée est claquée. C'est une porte blindée, serrure 3 points. Je n'ai pas de double des clés."
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              autoFocus
+            />
+            <div className="char-count">{description.length} caractères</div>
+          </div>
+        </div>
+      )}
+
+      {/* Étape 3: Photos */}
+      {currentStep === 3 && (
+        <div className="form-section step-content">
+          <h3 className="section-title">
+            Ajoutez des photos <span className="optional">(optionnel)</span>
+          </h3>
+          <MediaUpload 
+            onFilesChange={handleFilesChange}
+            maxFiles={5}
+            maxSizeMB={10}
+          />
+          <div className="help-text">
+            Les photos permettent à Joël de mieux analyser la situation
+          </div>
+        </div>
+      )}
+
+      {/* Navigation */}
+      <div className="step-navigation">
+        {currentStep > 1 && (
+          <button 
+            type="button" 
+            className="btn btn-secondary"
+            onClick={goPrev}
+          >
+            ← Précédent
+          </button>
+        )}
+        
+        <div className="nav-spacer" />
+
+        {currentStep < totalSteps ? (
+          <button 
+            type="button" 
+            className="btn btn-primary"
+            onClick={goNext}
+            disabled={!canGoNext()}
+          >
+            Suivant →
+          </button>
+        ) : (
+          <button 
+            type="submit" 
+            className="btn btn-primary submit-btn"
+            disabled={!metier || !description.trim() || isLoading}
+          >
+            {isLoading ? (
+              <>
+                <span className="spinner"></span>
+                Analyse en cours...
+              </>
+            ) : (
+              'Analyser avec Joël'
+            )}
+          </button>
+        )}
       </div>
     </form>
   );
