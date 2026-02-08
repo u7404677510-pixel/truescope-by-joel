@@ -1,12 +1,4 @@
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-// Charger .env immédiatement
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-
+// Les variables d'environnement sont chargées dans server.ts
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Configuration du client Gemini

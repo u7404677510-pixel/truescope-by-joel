@@ -2,17 +2,21 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { existsSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const envPath = path.resolve(__dirname, '../.env');
 
-console.log('📁 Chargement .env depuis:', envPath);
-const result = dotenv.config({ path: envPath });
-if (result.error) {
-  console.error('❌ Erreur chargement .env:', result.error);
+// En production, les variables sont dans l'environnement (Render), pas dans un fichier .env
+if (existsSync(envPath)) {
+  console.log('📁 Chargement .env depuis:', envPath);
+  const result = dotenv.config({ path: envPath });
+  if (result.parsed) {
+    console.log('✅ Variables chargées depuis .env:', Object.keys(result.parsed));
+  }
 } else {
-  console.log('✅ Variables chargées:', Object.keys(result.parsed || {}));
+  console.log('☁️ Mode production: variables d\'environnement chargées depuis le serveur');
 }
 
 import express from 'express';
